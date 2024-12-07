@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Śledzenie przesyłek InPost</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Śledzenie przesyłek InPost</h1>
+        <input type="text" id="trackingNumber" placeholder="Wprowadź numer przesyłki">
+        <button onclick="trackPackage()">Śledź</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function trackPackage() {
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            console.log(`Śledzenie przesyłki: ${trackingNumber}`);
+
+            fetch(`http://localhost:3000/track/${trackingNumber}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Sieć odpowiedziała błędem: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Otrzymane dane:', data);
+                    document.getElementById('result').innerHTML = formatParcelDetails(data.parcelDetails);
+                })
+                .catch(error => {
+                    console.error('Wystąpił błąd:', error);
+                    document.getElementById('result').innerText = 'Wystąpił błąd podczas śledzenia przesyłki.';
+                });
+        }
+
+        function formatParcelDetails(parcelDetails) {
+            const detailsArray = parcelDetails.split('\n');
+            const formattedDetails = detailsArray.map(line => `<div class="parcel-action">${line}</div>`).join('');
+            return formattedDetails || 'Brak danych do wyświetlenia.';
+        }
+    </script>
+</body>
+</html>
